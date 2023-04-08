@@ -5,7 +5,7 @@
     }
 </style>
 
-# Suspend siblings until mature <version>v0</version>
+# Suspend siblings until mature <version>v1</version>
 
 This add-on will look for Siblings of the current Card and suspend all of them.
 When the current card is very mature, it will Unsuspend its siblings.
