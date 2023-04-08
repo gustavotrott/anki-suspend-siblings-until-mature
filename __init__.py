@@ -34,24 +34,34 @@ def reviewer_did_answer_card(_, card: Card, ease):
         if sibling.ord < card.ord:
             return
 
-        # Remove sibling from curr queue (rev, new or learn)
-        if sibling.id in mw.col.sched._revQueue:
-            if willSuspend == False:
-                mw.col.sched.bury_cards(ids=[sibling.id, ], manual=False)
-            with suppress(AttributeError, ValueError):
-                mw.col.sched._revQueue.remove(sibling.id)  # noqa
+        if mw.col.sched.version < 3:
+            # print(f"Using scheduler < 3")
+            # Remove sibling from curr queue (rev, new or learn)
+            if sibling.id in mw.col.sched._revQueue:
+                if willSuspend == False:
+                    mw.col.sched.bury_cards(ids=[sibling.id, ], manual=False)
+                with suppress(AttributeError, ValueError):
+                    mw.col.sched._revQueue.remove(sibling.id)  # noqa
 
-        if sibling.id in mw.col.sched._newQueue:
-            if willSuspend == False:
-                mw.col.sched.bury_cards(ids=[sibling.id, ], manual=False)
-            with suppress(AttributeError, ValueError):
-                mw.col.sched._newQueue.remove(sibling.id)  # noqa
+            if sibling.id in mw.col.sched._newQueue:
+                if willSuspend == False:
+                    mw.col.sched.bury_cards(ids=[sibling.id, ], manual=False)
+                with suppress(AttributeError, ValueError):
+                    mw.col.sched._newQueue.remove(sibling.id)  # noqa
 
-        if sibling.id in mw.col.sched._lrnQueue:
-            if willSuspend == False:
-                mw.col.sched.bury_cards(ids=[sibling.id, ], manual=False)
-            with suppress(AttributeError, ValueError):
-                mw.col.sched._lrnQueue.remove(sibling.id)  # noqa
+            if sibling.id in mw.col.sched._lrnQueue:
+                if willSuspend == False:
+                    mw.col.sched.bury_cards(ids=[sibling.id, ], manual=False)
+                with suppress(AttributeError, ValueError):
+                    mw.col.sched._lrnQueue.remove(sibling.id)  # noqa
+        else:
+            # print(f"Using scheduler 3")
+            queuedCards = mw.col.sched.get_queued_cards(fetch_limit=10000).cards
+            for item in queuedCards:
+                if(item.card.id == sibling.id):
+                    #card = mw.col.get_card(item.card.id)
+                    if willSuspend == False:
+                        mw.col.sched.bury_cards(ids=[sibling.id, ], manual=False)
 
 
         # dont take any action if card is RELEARNING (pressed "Again" button)
