@@ -16,6 +16,8 @@ from .tools import (
     html_to_text_line,
 )
 
+# Define the tag to be added when suspending cards
+SUSPENDED_BY_ADDON_TAG = "suspended_by_addon"
 
 ############################################################################### reviewer
 ########################################################################################
@@ -75,12 +77,21 @@ def reviewer_did_answer_card(_, card: Card, ease):
 
         if willSuspend:
             mw.col.sched.suspend_cards(ids=[sibling.id])
+            note = sibling.note()
+            note.add_tag(SUSPENDED_BY_ADDON_TAG)
+            note.flush()
             print(f"Sibling: {question} Suspended!<br>")
             if not config.quiet:
                 tooltip(f"Sibling: {question} Suspended!<br>")
 
         if isMature and sibling.queue == QUEUE_TYPE_SUSPENDED and sibling.ord == card.ord + 1:
             mw.col.sched.unsuspend_cards(ids=[sibling.id])
+            # in the future the line above will be moved under SUSPENDED_BY_ADDON_TAG condition
+            # lets postpone it because currently it might have suspended cards without this tag
+            note = sibling.note()
+            if note.has_tag(SUSPENDED_BY_ADDON_TAG):
+                note.remove_tag(SUSPENDED_BY_ADDON_TAG)
+                note.flush()
             mw.col.sched.bury_cards(ids=[sibling.id], manual=False)
             question = html_to_text_line(sibling.question())
             print(f"Sibling: {question} UNSuspended!<br>")
