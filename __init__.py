@@ -39,7 +39,7 @@ def reviewer_did_answer_card(_, card: Card, ease):
 
         # Skip if sibling is ahead in the order
         if sibling.ord < card.ord:
-            return
+            continue
 
         if mw.col.sched.version < 3:
             # print(f"Using scheduler < 3")
@@ -71,7 +71,7 @@ def reviewer_did_answer_card(_, card: Card, ease):
 
         # Don't take any action if the card is RELEARNING (pressed "Again" button)
         if card.type == CARD_TYPE_RELEARNING:
-            return
+            continue
 
         if willSuspend:
             mw.col.sched.suspend_cards(ids=[sibling.id])
