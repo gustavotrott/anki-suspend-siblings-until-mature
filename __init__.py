@@ -78,21 +78,24 @@ def reviewer_did_answer_card(_, card: Card, ease):
         if willSuspend:
             mw.col.sched.suspend_cards(ids=[sibling.id])
             note = sibling.note()
-            note.add_tag(SUSPENDED_BY_ADDON_TAG)
-            note.flush()
+            if not note.has_tag(SUSPENDED_BY_ADDON_TAG):
+                note.add_tag(SUSPENDED_BY_ADDON_TAG)
+                note.flush()
             print(f"Sibling: {question} Suspended!<br>")
             if not config.quiet:
                 tooltip(f"Sibling: {question} Suspended!<br>")
 
         if isMature and sibling.queue == QUEUE_TYPE_SUSPENDED and sibling.ord == card.ord + 1:
-            mw.col.sched.unsuspend_cards(ids=[sibling.id])
-            # in the future the line above will be moved under SUSPENDED_BY_ADDON_TAG condition
+            note = sibling.note()
+            if note.has_tag(SUSPENDED_BY_ADDON_TAG):
+                #remove tag if there is left no siblings suspended
+                other_suspended_siblings = [s for s in siblings if s.id != sibling.id and s.queue == QUEUE_TYPE_SUSPENDED]
+                if not other_suspended_siblings:
+                    note.remove_tag(SUSPENDED_BY_ADDON_TAG)
+                    note.flush()
+            # in the future the following lines will be moved under SUSPENDED_BY_ADDON_TAG condition
             # lets postpone it because currently it might have suspended cards without this tag
-            # note = sibling.note()
-            # if note.has_tag(SUSPENDED_BY_ADDON_TAG):
-                # not sure if it should remove the tag because it might have more suspended siblings
-            #     note.remove_tag(SUSPENDED_BY_ADDON_TAG)
-            #     note.flush()
+            mw.col.sched.unsuspend_cards(ids=[sibling.id])
             mw.col.sched.bury_cards(ids=[sibling.id], manual=False)
             question = html_to_text_line(sibling.question())
             print(f"Sibling: {question} UNSuspended!<br>")
