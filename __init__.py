@@ -88,10 +88,11 @@ def reviewer_did_answer_card(_, card: Card, ease):
             mw.col.sched.unsuspend_cards(ids=[sibling.id])
             # in the future the line above will be moved under SUSPENDED_BY_ADDON_TAG condition
             # lets postpone it because currently it might have suspended cards without this tag
-            note = sibling.note()
-            if note.has_tag(SUSPENDED_BY_ADDON_TAG):
-                note.remove_tag(SUSPENDED_BY_ADDON_TAG)
-                note.flush()
+            # note = sibling.note()
+            # if note.has_tag(SUSPENDED_BY_ADDON_TAG):
+                # not sure if it should remove the tag because it might have more suspended siblings
+            #     note.remove_tag(SUSPENDED_BY_ADDON_TAG)
+            #     note.flush()
             mw.col.sched.bury_cards(ids=[sibling.id], manual=False)
             question = html_to_text_line(sibling.question())
             print(f"Sibling: {question} UNSuspended!<br>")
